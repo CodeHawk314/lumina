@@ -1,0 +1,33 @@
+/* Basic editor styles */
+.tiptap {
+  /* Remove top margin for the first child */
+  > *:first-child {
+    margin-top: 0;
+  }
+}
+
+/* List styles */
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5rem; /* Indent the list items */
+  margin: 1.25rem 1rem 1.25rem 0.4rem;
+  list-style-type: disc; /* Show bullets for unordered lists */
+}
+
+.tiptap ul ul {
+  list-style-type: circle; /* Nested level 1 */
+}
+
+.tiptap ul ul ul {
+  list-style-type: square; /* Nested level 2 */
+}
+
+.tiptap ol {
+  list-style-type: decimal; /* Show numbers for ordered lists */
+}
+
+.tiptap ul li p,
+.tiptap ol li p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
