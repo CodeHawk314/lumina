@@ -28,9 +28,21 @@ const OutlineEditor = () => {
           <li>And another one</li>
         </ul>
         `,
+    immediatelyRender: false,
   });
 
-  return <EditorContent editor={editor} />;
+  return (
+    <div
+      className="min-h-[40vh] w-full border p-8 border-gray-300 rounded-lg"
+      onClick={() => editor?.commands.focus("end")}
+    >
+      <EditorContent
+        editor={editor}
+        width={"full"}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
 };
 
 export default OutlineEditor;

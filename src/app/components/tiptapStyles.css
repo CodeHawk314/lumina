@@ -4,6 +4,11 @@
   > *:first-child {
     margin-top: 0;
   }
+  height: fit-content;
+}
+
+.tiptap:focus {
+  outline: none;
 }
 
 /* List styles */
