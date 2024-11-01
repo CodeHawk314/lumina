@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumina
+
+Lumina, created by Elijah Kim and Nicole Garcia. Helping students brainstorm their college application essays.
 
 ## Getting Started
 
