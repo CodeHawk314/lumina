@@ -4,7 +4,7 @@ import random
 # Set up OpenAI API key
 openai.api_key = "insert API key here"
 
-# Define your corpus of initial questions
+# Initial questions drawn from brainstorming resources
 initial_questions = [
     "Tell the story of a time you laughed so hard you cried.",
     "What is your favorite quote?",
@@ -140,7 +140,7 @@ def main():
     # Step 2: Collect responses from the student
     student_responses = {}
     for idx, question in enumerate(selected_questions, start=1):
-        # Placeholder for now, replace wiuth student response from frontend
+        # Placeholder for now, replace with student response from frontend
         response = input(f"Answer for Question {idx}: {question}\nYour response: ")
         student_responses[question] = response
 
