@@ -104,12 +104,18 @@ initial_questions = [
 def select_initial_questions(num_questions=5):
     return random.sample(initial_questions, num_questions)
 
-# Generate follow-up questions based on a student response
+# Generate follow-up questions based on student response
 def generate_followup_questions(student_response):
     prompt = (
         f"Based on the following student response, suggest several deeper follow-up questions "
-        f"to explore the topic further:\n\n"
-        f"Student's response: '{student_response}'\n\nFollow-up questions:"
+        f"to explore the topic further. Format the output as follows:\n\n"
+        f"Student Response: [student response]\n"
+        f"Follow Up Question: [follow up question 1]\n"
+        f"Follow Up Question: [follow up question 2]\n"
+        f"Follow Up Question: [follow up question 3]\n"
+        f"(Continue listing as needed)\n\n"
+        f"Student's response: '{student_response}'\n\n"
+        f"Output the follow-up questions:"
     )
     
     # OpenAI API call to generate follow-up questions
@@ -121,14 +127,17 @@ def generate_followup_questions(student_response):
         n=1
     )
     
-    # Process the response to get a list of follow-up questions
-    follow_up_questions = [
-        question.strip() 
-        for question in response.choices[0].text.strip().split('\n') 
-        if question.strip()
-    ]
+    # Extract and process the follow-up questions from the response
+    follow_up_questions = response.choices[0].text.strip().split('\n')
     
-    return follow_up_questions
+    # Clean the list by removing any empty strings and formatting
+    follow_up_questions = [question.strip() for question in follow_up_questions if question.strip()]
+    
+    # Return a dict with the student response and follow-up questions
+    return {
+        "student_response": student_response,
+        "follow_up_questions": follow_up_questions
+    }
 
 def main():
     # Step 1: Select initial questions
@@ -153,7 +162,7 @@ def main():
     # Step 4: Display all follow-up questions for each initial question
     print("\nGenerated Follow-Up Questions:")
     for initial_question, follow_up_questions in all_follow_up_questions.items():
-        student_response = student_responses[initial_question]
+        student_response = student_responses[initial_question]  # Retrieve student's response
         print(f"\nFor the question: '{initial_question}'")
         print(f"Student's response: '{student_response}'")
         print("Follow-up questions inspired by this response:")
