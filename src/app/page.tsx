@@ -1,4 +1,4 @@
-import OutlineEditor from "./components/outlineEditor";
+import OutlineEditor from "./components/luminaEditor/outlineEditor";
 
 export default function Home() {
   return (

@@ -9,6 +9,8 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
+import { KeyboardEventHandler } from "react";
+import { parseOutlineJson } from "./outlineparse";
 
 const OutlineEditor = () => {
   const editor = useEditor({
@@ -31,6 +33,14 @@ const OutlineEditor = () => {
     immediatelyRender: false,
   });
 
+  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.key === "Enter") {
+      console.log("Enter key pressed");
+      const outline = editor?.getJSON();
+      console.log(parseOutlineJson(outline || {}));
+    }
+  };
+
   return (
     <div
       className="min-h-[40vh] w-full border p-8 border-gray-300 rounded-lg"
@@ -40,6 +50,7 @@ const OutlineEditor = () => {
         editor={editor}
         width={"full"}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
       />
     </div>
   );
