@@ -19,7 +19,9 @@
     "@tiptap/starter-kit": "^2.9.1",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
-    "react-dom": "19.0.0-rc-02c0e824-20241028"
+    "react-dom": "19.0.0-rc-02c0e824-20241028",
+    "together-ai": "^0.8.0",
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",
