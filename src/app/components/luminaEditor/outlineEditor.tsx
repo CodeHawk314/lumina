@@ -9,10 +9,13 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
-import { KeyboardEventHandler, useEffect, useState } from "react";
+import { KeyboardEventHandler, useState } from "react";
 import { parseOutlineJson } from "./outlineparse";
+import { selectInitialQuestions } from "@/app/utils/ai";
 
 const OutlineEditor = () => {
+  const initialQuestions = selectInitialQuestions(3);
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -25,38 +28,80 @@ const OutlineEditor = () => {
       Color,
     ],
     content: `
-        <ul>
-          <li><span style="color: #958DF1">A list item</span></li>
-          <li>And another one</li>
-        </ul>
-        `,
+    <ul>
+    ${initialQuestions
+      .map(
+        (q) => `
+        <li><span style="color: #958DF1">${q}</span>
+          <ul>
+            <li>Student response goes here...</li>
+          </ul>
+        </li>`
+      )
+      .join("")}
+    </ul>
+    `,
     immediatelyRender: false,
   });
 
   const [aiResp, setAiResp] = useState<string>("");
 
-  useEffect(() => {
-    const eventSource = new EventSource("/api/outlineresp");
+  // useEffect(() => {
+  //   const eventSource = new EventSource("/api/outlineresp");
 
-    eventSource.onmessage = (event) => {
-      console.log(JSON.stringify(event.data));
-      setAiResp((prev) => prev + event.data);
-    };
+  //   eventSource.onmessage = (event) => {
+  //     console.log(JSON.stringify(event.data));
+  //     setAiResp((prev) => prev + event.data);
+  //   };
 
-    eventSource.onerror = () => {
-      eventSource.close();
-    };
+  //   eventSource.onerror = () => {
+  //     eventSource.close();
+  //   };
 
-    return () => {
-      eventSource.close();
-    };
-  }, []);
+  //   return () => {
+  //     eventSource.close();
+  //   };
+  // }, []);
 
-  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
+  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = async (e) => {
     if (e.key === "Enter") {
       console.log("Enter key pressed");
-      const outline = editor?.getJSON();
-      console.log(parseOutlineJson(outline || {}));
+      const outline = parseOutlineJson(editor?.getJSON() || {});
+      console.log(outline);
+
+      // Send outline data with POST
+      const response = await fetch("/api/outlineresp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ outline }),
+      });
+
+      if (response.ok) {
+        // Receive sessionId from the server
+        const { sessionId } = await response.json();
+
+        // Open EventSource using the unique sessionId
+        const eventSource = new EventSource(
+          `/api/outlineresp?sessionId=${sessionId}`
+        );
+
+        eventSource.onmessage = (event) => {
+          setAiResp((prev) => prev + event.data);
+        };
+
+        eventSource.onerror = () => {
+          eventSource.close();
+        };
+
+        return () => {
+          eventSource.close();
+        };
+      } else {
+        console.error("Failed to send outline JSON");
+      }
     }
   };
 
