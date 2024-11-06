@@ -9,7 +9,7 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
-import { KeyboardEventHandler } from "react";
+import { KeyboardEventHandler, useEffect, useState } from "react";
 import { parseOutlineJson } from "./outlineparse";
 
 const OutlineEditor = () => {
@@ -33,6 +33,25 @@ const OutlineEditor = () => {
     immediatelyRender: false,
   });
 
+  const [aiResp, setAiResp] = useState<string>("");
+
+  useEffect(() => {
+    const eventSource = new EventSource("/api/outlineresp");
+
+    eventSource.onmessage = (event) => {
+      console.log(JSON.stringify(event.data));
+      setAiResp((prev) => prev + event.data);
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
   const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key === "Enter") {
       console.log("Enter key pressed");
@@ -52,6 +71,7 @@ const OutlineEditor = () => {
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       />
+      <div>{aiResp}</div>
     </div>
   );
 };
