@@ -1,8 +1,12 @@
-import openai
+# import openai
 import random
+import os
+from together import Together
 
-# Set up OpenAI API key
-openai.api_key = "insert API key here"
+# Run line below in terminal to set up together ai API key
+# export TOGETHER_API_KEY=ba1f969850aff90a61277544c46b4afb81183cf1d5f86a059615ee7fe5c24a56
+
+client = Together()
 
 # Initial questions drawn from brainstorming resources
 initial_questions = [
@@ -97,7 +101,46 @@ initial_questions = [
     "What skill or talent that you don’t have would you most like to have?",
     "Which traditions from your upbringing will you pass on, and which will you ignore?",
     "What everyday thing are you the world's greatest at? Who taught you?",
-    "What do you most like about yourself? Describe a time this was useful."
+    "What do you most like about yourself? Describe a time this was useful.",
+    "What has been the greatest moment in your life?",
+    "What was the worst moment of your life?",
+    "What is the most disgusting food that you like?",
+    "What is one item or object you associate with your Mom or Dad?",
+    "What’s more important to you: financial stability or doing what you love?",
+    "What will your life look like in 10 years? Where will you be living?",
+    "How will you get to where you want to be?",
+    "What are 21 details from your life, interesting facts that describe some small, random part of who you are?",
+    "What is something you’re really opinionated about?",
+    "What is your biggest flaw, and what, if anything, have you done to try to overcome it?",
+    "What’s the most recent thing you researched on your own (not for school)?",
+    "What’s something unique about your community, and how has this influenced you?",
+    "What’s something you regret?",
+    "What are your top five values? What stories demonstrate these values?",
+    "Have you ever changed a belief that you were previously very sure about? Who or what caused this shift?",
+    "When have you encountered someone with beliefs or values different from your own? How did that experience change or solidify your own beliefs?",
+    "What are some activities or accomplishments you’re proud of?",
+    "What’s a topic that you could give an hour-long lecture about?",
+    "What’s your favorite TV show or film? Why?",
+    "What are 10 things you’d take to a desert island?",
+    "If your life were a movie, what songs would be on the soundtrack, and why?",
+    "What objects do people think of when they think of you?",
+    "What is your real-life superpower and kryptonite?",
+    "What’s your “life motto”?",
+    "What are the top three things you want colleges to know about you?",
+    "What is your most valued childhood memory?",
+    "Have you been responsible for caring for family members? How has this impacted your academics, goals, and values?",
+    "If different from your current place of residence, does your home country or place of birth have special meaning for you?",
+    "What has been your most significant cross-cultural experience? Why? How did it change your perspective?",
+    "Can you identify trends in your commitments? What do they say about your values and abilities?",
+    "Discuss an accomplishment in which you exercised leadership. How effective were you in motivating or guiding others?",
+    "Think of a time when you truly helped someone. What did you do? How did this impact the other person? How did your actions impact you?",
+    "Give an example of when you exhibited creativity. Describe your thoughts and actions.",
+    "Reflect on a time in which you failed to accomplish what you set out to do. How did you recover from that failure?",
+    "What was an important risk that you took? Why did you take this risk? What was the outcome? Would you do it again?",
+    "What are your career aspirations, and how will college help you to reach them?",
+    "What unique skills and experiences do you have to offer the school, your fellow students, the faculty, the broader community?",
+    "Why do you think you will succeed in college?",
+    "Name a current obstacle to the realization of your goals. What causes this problem? What are you doing to change it?"
 ]
 
 # Randomly select a subset of initial questions
@@ -106,33 +149,43 @@ def select_initial_questions(num_questions=5):
 
 # Generate follow-up questions based on student response
 def generate_followup_questions(student_response):
-    prompt = (
-        f"Based on the following student response, suggest several deeper follow-up questions "
-        f"to explore the topic further. Format the output as follows:\n\n"
-        f"Student Response: [student response]\n"
-        f"Follow Up Question: [follow up question 1]\n"
-        f"Follow Up Question: [follow up question 2]\n"
-        f"Follow Up Question: [follow up question 3]\n"
-        f"(Continue listing as needed)\n\n"
-        f"Student's response: '{student_response}'\n\n"
-        f"Output the follow-up questions:"
+    # Construct the message for Together API call
+    messages = [
+        {
+            "role": "user",
+            "content": (
+                f"Based on the following student response, suggest several deeper follow-up questions "
+                f"to explore the topic further for a college application essay. Format the output as follows:\n\n"
+                f"Student Response: [student response]\n"
+                f"1. [follow up question 1]\n"
+                f"2. [follow up question 2]\n"
+                f"3. [follow up question 3]\n"
+                f"(Continue listing as needed)\n\n"
+                f"Student's response: '{student_response}'\n\n"
+                f"Output ONLY the follow-up questions:"
+            ),
+        }
+    ]
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-3-70b-chat-hf",
+        messages=messages,
+        stream=True
     )
-    
-    # OpenAI API call to generate follow-up questions
-    response = openai.Completion.create(
-        engine="gpt-4",
-        prompt=prompt,
-        max_tokens=150,
-        temperature=0.7,
-        n=1
-    )
-    
-    # Extract and process the follow-up questions from the response
-    follow_up_questions = response.choices[0].text.strip().split('\n')
-    
+
+    # Collects and prints out response from streaming generator (follow-up questions)
+    complete_response = ""
+    for token in response:
+        if hasattr(token, 'choices'):
+            print(token.choices[0].delta.content, end='', flush=True)
+            complete_response += token.choices[0].delta.content      
+
+    # Split the complete response into individual follow-up questions
+    follow_up_questions = complete_response.strip().split('\n')
+
     # Clean the list by removing any empty strings and formatting
     follow_up_questions = [question.strip() for question in follow_up_questions if question.strip()]
-    
+
     # Return a dict with the student response and follow-up questions
     return {
         "student_response": student_response,
@@ -156,8 +209,8 @@ def main():
     # Step 3: Generate follow-up questions based on student responses
     all_follow_up_questions = {}
     for question, response in student_responses.items():
-        follow_up_questions = generate_followup_questions(response)
-        all_follow_up_questions[question] = follow_up_questions
+        follow_up_data = generate_followup_questions(response)
+        all_follow_up_questions[question] = follow_up_data["follow_up_questions"]
 
     # Step 4: Display all follow-up questions for each initial question
     print("\nGenerated Follow-Up Questions:")
@@ -167,7 +220,7 @@ def main():
         print(f"Student's response: '{student_response}'")
         print("Follow-up questions inspired by this response:")
         for follow_up_question in follow_up_questions:
-            print("-", follow_up_question)
+            print(follow_up_question)
 
 # Run the main function
 if __name__ == "__main__":
