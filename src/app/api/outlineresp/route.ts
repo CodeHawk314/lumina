@@ -1,9 +1,10 @@
+import { Bullet } from "@/app/components/luminaEditor/outlineparse";
 import { NextResponse } from "next/server";
 import Together from "together-ai";
 import { v4 as uuidv4 } from "uuid";
 
 // Temporary storage for sessions (consider using a database in production)
-const sessions: { [key: string]: object } = {};
+const sessions: { [key: string]: Bullet[] } = {};
 
 export async function POST(req: Request) {
   try {
@@ -20,6 +21,20 @@ export async function POST(req: Request) {
   }
 }
 
+function getBulletNumber(text: string): number | null {
+  // Use a regular expression to find all bullet numbers in the text
+  const matches = text.match(/(\d+)\./g);
+
+  // If matches are found, extract the last number
+  if (matches && matches.length > 0) {
+    const lastMatch = matches[matches.length - 1];
+    const number = lastMatch.match(/^(\d+)/);
+    return number ? parseInt(number[1], 10) : null;
+  }
+
+  // Return null if no valid bullet number is found
+  return null;
+}
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const sessionId = url.searchParams.get("sessionId");
@@ -33,6 +48,9 @@ export async function GET(req: Request) {
   if (!outline) {
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
+
+  const question = outline[0].text;
+  const studentResponse = outline[0].subbullets?.[0].text || "";
 
   const together = new Together();
   const responseStream = new ReadableStream({
@@ -54,17 +72,42 @@ export async function GET(req: Request) {
               )}`,
             },
             {
-              role: "user",
-              content: `Give a specific follow up question`,
+              role: "system",
+              content:
+                `Based on the student response: "${studentResponse}", suggest 2-3 deeper follow-up questions ` +
+                `for the question "${question}"` +
+                `to explore the topic further for a college application essay. Format the output as follows:\n\n` +
+                `1. [follow up question 1]\n` +
+                `2. [follow up question 2]\n` +
+                `3. [follow up question 3]\n\n` +
+                `Output ONLY the follow-up questions:`,
             },
           ],
           stream: true,
         });
 
+        let fullResponse = "";
+
         for await (const chunk of stream) {
           const text = chunk.choices[0]?.delta.content || "";
           const formattedText = text.replace(/\n/g, "\\n");
-          controller.enqueue(`data: ${formattedText}\n\n`);
+          fullResponse += formattedText;
+          const bulletNum = getBulletNumber(fullResponse);
+          console.log(text);
+          const strippedText = text; // text.replace(/\n\d+\./g, "");
+          if (
+            strippedText.length == 0 ||
+            strippedText === "." ||
+            /^\d$/.test(strippedText)
+          ) {
+            continue;
+          }
+          const data = {
+            question,
+            text: strippedText,
+            responseNum: bulletNum,
+          };
+          controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
         }
 
         controller.close();

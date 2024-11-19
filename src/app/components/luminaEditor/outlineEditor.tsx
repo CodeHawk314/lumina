@@ -1,5 +1,5 @@
 "use client";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import Bold from "@tiptap/extension-bold";
 import { Color } from "@tiptap/extension-color";
 import BulletList from "@tiptap/extension-bullet-list";
@@ -9,9 +9,60 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
-import { KeyboardEventHandler, useState } from "react";
-import { parseOutlineJson } from "./outlineparse";
+import { KeyboardEventHandler } from "react";
+import { Bullet, generateOutlineJson, parseOutlineJson } from "./outlineparse";
 import { selectInitialQuestions } from "@/app/utils/ai";
+
+const addToOutline = (
+  editor: Editor,
+  question: string,
+  responseNum: number,
+  additionText: string
+) => {
+  console.log("ADDING TO OUTLINE");
+  const jsonContent = editor.getJSON();
+  console.log(jsonContent);
+
+  const outline: Bullet[] = parseOutlineJson(jsonContent);
+
+  console.log(outline);
+
+  // Helper function to add the node recursively
+  const addNodeToOutline = (bullets: Bullet[]): boolean => {
+    for (const bullet of bullets) {
+      if (bullet.text === question) {
+        if (!bullet.subbullets) {
+          bullet.subbullets = [];
+        }
+        if (bullet.subbullets.length > responseNum) {
+          if (!bullet.subbullets[responseNum].text) {
+            bullet.subbullets[responseNum].text = "";
+          }
+          bullet.subbullets[responseNum].text += additionText;
+          bullet.subbullets[responseNum].author = "LLM";
+        } else {
+          bullet.subbullets.push({
+            text: additionText,
+            author: "LLM",
+          });
+        }
+        return true; // Node added, exit recursion
+      }
+      if (bullet.subbullets && addNodeToOutline(bullet.subbullets)) {
+        return true; // Node added in subbullets, exit recursion
+      }
+    }
+    return false; // Node not found in this branch
+  };
+
+  if (!addNodeToOutline(outline)) {
+    console.error(`Question "${question}" not found in outline.`);
+  }
+
+  const newOutline = generateOutlineJson(outline);
+  console.log(newOutline);
+  editor.commands.setContent(newOutline);
+};
 
 const OutlineEditor = () => {
   const initialQuestions = selectInitialQuestions(3);
@@ -43,8 +94,6 @@ const OutlineEditor = () => {
     `,
     immediatelyRender: false,
   });
-
-  const [aiResp, setAiResp] = useState<string>("");
 
   // useEffect(() => {
   //   const eventSource = new EventSource("/api/outlineresp");
@@ -89,7 +138,15 @@ const OutlineEditor = () => {
         );
 
         eventSource.onmessage = (event) => {
-          setAiResp((prev) => prev + event.data);
+          const data = JSON.parse(event.data);
+          const aiResponse = data.text;
+          const question = data.question;
+          const bulletNum = data.responseNum;
+          console.log(question);
+          console.log(bulletNum);
+          if (editor !== null) {
+            addToOutline(editor, question, bulletNum, aiResponse);
+          }
         };
 
         eventSource.onerror = () => {
@@ -116,7 +173,6 @@ const OutlineEditor = () => {
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       />
-      <div>{aiResp}</div>
     </div>
   );
 };
