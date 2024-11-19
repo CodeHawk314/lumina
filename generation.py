@@ -229,7 +229,7 @@ def brainstorming_round(questions, initial_round=True):
 def main():
     # Step 1: Select initial questions
     # Change num_questions back to 5 when not debugging
-    selected_questions = select_initial_questions(num_questions=2)
+    selected_questions = select_initial_questions(num_questions=5)
     print("Initial Questions:")
     for idx, question in enumerate(selected_questions, start=1):
         print(f"{idx}. {question}")
