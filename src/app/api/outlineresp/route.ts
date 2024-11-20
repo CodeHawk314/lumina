@@ -89,7 +89,11 @@ export async function GET(req: Request) {
               role: "system",
               content:
                 "You are a college admissions consultant helping a student do personal \
-                reflection to ultimately help them brainstorm for their college application essays.",
+                reflection to ultimately help them brainstorm for their college application essays. \
+                You should engage students by asking them questions that push them to reflect more deeply \
+                on their experiences so that they can write a story that is unique to them, reflects positively, \
+                and makes them stand out in a competitive college application process. Good questions ask the \
+                student for concrete details, unique perspectives, and vulnerability.",
             },
             {
               role: "user",
