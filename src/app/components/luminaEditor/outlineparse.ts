@@ -1,6 +1,6 @@
 import { JSONContent } from "@tiptap/react";
 
-type Bullet = {
+export type Bullet = {
   text: string;
   author: "USER" | "LLM";
   subbullets?: Bullet[];
@@ -27,4 +27,47 @@ export function parseOutlineJson(json: JSONContent): Bullet[] {
 
   if (!json.content || !json.content[0].content) return [];
   return json.content[0].content.map(parseListItem);
+}
+
+export function generateOutlineJson(bullets: Bullet[]): JSONContent {
+  function generateListItem(bullet: Bullet): JSONContent {
+    const textNode: JSONContent = {
+      type: "text",
+      text: bullet.text,
+      marks:
+        bullet.author === "LLM"
+          ? [{ type: "textStyle", attrs: { color: "rgb(149, 141, 241)" } }]
+          : [],
+    };
+
+    const paragraphNode: JSONContent = {
+      type: "paragraph",
+      content: bullet.text ? [textNode] : undefined,
+    };
+
+    const listItemNode: JSONContent = {
+      type: "listItem",
+      content: [paragraphNode],
+    };
+
+    if (bullet.subbullets && bullet.subbullets.length > 0) {
+      const nestedBulletList: JSONContent = {
+        type: "bulletList",
+        content: bullet.subbullets.map(generateListItem),
+      };
+      listItemNode.content!.push(nestedBulletList);
+    }
+
+    return listItemNode;
+  }
+
+  return {
+    type: "doc",
+    content: [
+      {
+        type: "bulletList",
+        content: bullets.map(generateListItem),
+      },
+    ],
+  };
 }

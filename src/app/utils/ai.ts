@@ -1,11 +1,7 @@
-// import { Configuration, OpenAIApi } from "openai";
-
-// Set up OpenAI API
-// const openai = new OpenAIApi(
-//   new Configuration({
-//     apiKey: "insert API key here",
-//   })
-// );
+// import Together from "together-ai";
+// const together = new Together({
+//   apiKey: "6d89e3bcae49a64d845bfda30b26c3b079db88d817c5cea066951b0f089d5b56",
+// });
 
 // Initial questions drawn from brainstorming resources
 const initialQuestions = [
@@ -109,93 +105,59 @@ export function selectInitialQuestions(numQuestions: number = 5): string[] {
   return shuffled.slice(0, numQuestions);
 }
 
-// Generate follow-up questions based on student response
-async function generateFollowupQuestions(
-  studentResponse: string
-): Promise<string[]> {
-  const prompt = `
-    Based on the following student response, suggest several deeper follow-up questions 
-    to explore the topic further. Format the output as follows:
+// export async function generateFollowupQuestions(
+//   studentResponse: string
+// ): Promise<{
+//   studentResponse: string;
+//   followUpQuestions: string[];
+// }> {
+//   // Construct the message for the Together API call
+//   const messages: Together.Chat.Completions.CompletionCreateParams.Message[] = [
+//     {
+//       role: "user",
+//       content:
+//         `Based on the following student response, suggest several deeper follow-up questions ` +
+//         `to explore the topic further for a college application essay. Format the output as follows:\n\n` +
+//         `Student Response: [student response]\n` +
+//         `1. [follow up question 1]\n` +
+//         `2. [follow up question 2]\n` +
+//         `3. [follow up question 3]\n` +
+//         `(Continue listing as needed)\n\n` +
+//         `Student's response: '${studentResponse}'\n\n` +
+//         `Output ONLY the follow-up questions:`,
+//     },
+//   ];
 
-    Student Response: [student response]
-    Follow Up Question: [follow up question 1]
-    Follow Up Question: [follow up question 2]
-    Follow Up Question: [follow up question 3]
-    (Continue listing as needed)
+//   try {
+//     // Call the Together API or equivalent
+//     const response = await together.chat.completions.create({
+//       model: "meta-llama/Llama-3-70b-chat-hf",
+//       messages,
+//       stream: true,
+//     });
 
-    Student's response: '${studentResponse}'
+//     // Collect and process response from the streaming generator
+//     let completeResponse = "";
+//     for await (const token of response) {
+//       if (token.choices?.[0]?.delta?.content) {
+//         completeResponse += token.choices[0].delta.content;
+//       }
+//     }
 
-    Output the follow-up questions:
-  `;
+//     // Split the complete response into individual follow-up questions
+//     const followUpQuestions = completeResponse
+//       .trim()
+//       .split("\n")
+//       .map((question) => question.trim())
+//       .filter((question) => question.length > 0);
 
-  try {
-    const response = await openai.createCompletion({
-      model: "gpt-4",
-      prompt,
-      max_tokens: 150,
-      temperature: 0.7,
-      n: 1,
-    });
-
-    const followUpText = response.data.choices[0].text || "";
-    const followUpQuestions = followUpText
-      .split("\n")
-      .map((q) => q.trim())
-      .filter((q) => q);
-
-    return followUpQuestions;
-  } catch (error) {
-    console.error("Error generating follow-up questions:", error);
-    return [];
-  }
-}
-
-async function main() {
-  // Step 1: Select initial questions
-  const selectedQuestions = selectInitialQuestions(5);
-  console.log("Initial Questions:");
-  selectedQuestions.forEach((question, idx) => {
-    console.log(`${idx + 1}. ${question}`);
-  });
-
-  // Step 2: Collect responses from the student
-  const studentResponses: Record<string, string> = {};
-  for (const question of selectedQuestions) {
-    // Placeholder for student responses, replace with input collection logic
-    const response = await prompt(
-      `Answer for Question: ${question}\nYour response: `
-    );
-    studentResponses[question] = response;
-  }
-
-  // Step 3: Generate follow-up questions based on student responses
-  const allFollowUpQuestions: Record<string, string[]> = {};
-  for (const [question, response] of Object.entries(studentResponses)) {
-    const followUpQuestions = await generateFollowupQuestions(response);
-    allFollowUpQuestions[question] = followUpQuestions;
-  }
-
-  // Step 4: Display all follow-up questions for each initial question
-  console.log("\nGenerated Follow-Up Questions:");
-  for (const [initialQuestion, followUpQuestions] of Object.entries(
-    allFollowUpQuestions
-  )) {
-    console.log(`\nFor the question: '${initialQuestion}'`);
-    console.log(`Student's response: '${studentResponses[initialQuestion]}'`);
-    console.log("Follow-up questions inspired by this response:");
-    followUpQuestions.forEach((followUpQuestion) =>
-      console.log("-", followUpQuestion)
-    );
-  }
-}
-
-// Helper function for user input
-async function prompt(question: string): Promise<string> {
-  return new Promise((resolve) => {
-    process.stdout.write(question);
-    process.stdin.once("data", (data) => resolve(data.toString().trim()));
-  });
-}
-
-// Run the main function
-// main()
+//     // Return a dict with the student response and follow-up questions
+//     return {
+//       studentResponse,
+//       followUpQuestions,
+//     };
+//   } catch (error) {
+//     console.error("Error generating follow-up questions:", error);
+//     throw new Error("Failed to generate follow-up questions");
+//   }
+// }
