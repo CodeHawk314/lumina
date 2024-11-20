@@ -12,6 +12,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import { KeyboardEventHandler } from "react";
 import { Bullet, generateOutlineJson, parseOutlineJson } from "./outlineparse";
 import { selectInitialQuestions } from "@/app/utils/ai";
+import { Node } from "@tiptap/pm/model";
 
 const addToOutline = (
   editor: Editor,
@@ -112,11 +113,32 @@ const OutlineEditor = () => {
   //   };
   // }, []);
 
+  const isLLMNode = (node: Node): boolean => {
+    return (node.marks[0] && Boolean(node.marks[0].attrs.color)) || false;
+  };
+
+  const nodeText = (node: Node): string => {
+    return node.textContent || "";
+  };
+
   const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = async (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && editor) {
       console.log("Enter key pressed");
-      const outline = parseOutlineJson(editor?.getJSON() || {});
-      console.log(outline);
+      const state = editor.view.state;
+      const from = state.selection.from;
+      const pos = state.doc.resolve(from - 4);
+      const node = pos.node();
+
+      if (isLLMNode(node.child(0))) {
+        console.log("resetting marks");
+        // reset marks on current node
+        editor.commands.unsetMark("textStyle");
+        editor.chain().focus().sinkListItem("listItem").run();
+        return;
+      }
+      const currentLine = nodeText(node.child(0));
+
+      const outline = parseOutlineJson(editor.getJSON());
 
       // Send outline data with POST
       const response = await fetch("/api/outlineresp", {
@@ -125,7 +147,7 @@ const OutlineEditor = () => {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ outline }),
+        body: JSON.stringify({ outline, currentLine }),
       });
 
       if (response.ok) {
@@ -142,11 +164,7 @@ const OutlineEditor = () => {
           const aiResponse = data.text;
           const question = data.question;
           const bulletNum = data.responseNum;
-          console.log(question);
-          console.log(bulletNum);
-          if (editor !== null) {
-            addToOutline(editor, question, bulletNum, aiResponse);
-          }
+          addToOutline(editor, question, bulletNum, aiResponse);
         };
 
         eventSource.onerror = () => {
