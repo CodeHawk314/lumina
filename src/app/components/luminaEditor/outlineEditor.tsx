@@ -20,13 +20,13 @@ const addToOutline = (
   responseNum: number,
   additionText: string
 ) => {
-  console.log("ADDING TO OUTLINE");
+  // console.log("ADDING TO OUTLINE");
   const jsonContent = editor.getJSON();
-  console.log(jsonContent);
+  // console.log(jsonContent);
 
   const outline: Bullet[] = parseOutlineJson(jsonContent);
 
-  console.log(outline);
+  // console.log(outline);
 
   // Helper function to add the node recursively
   const addNodeToOutline = (bullets: Bullet[]): boolean => {
@@ -61,7 +61,7 @@ const addToOutline = (
   }
 
   const newOutline = generateOutlineJson(outline);
-  console.log(newOutline);
+  // console.log(newOutline);
   editor.commands.setContent(newOutline);
 };
 
@@ -123,14 +123,14 @@ const OutlineEditor = () => {
 
   const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = async (e) => {
     if (e.key === "Enter" && editor) {
-      console.log("Enter key pressed");
+      // console.log("Enter key pressed");
       const state = editor.view.state;
       const from = state.selection.from;
       const pos = state.doc.resolve(from - 4);
       const node = pos.node();
 
       if (isLLMNode(node.child(0))) {
-        console.log("resetting marks");
+        // console.log("resetting marks");
         // reset marks on current node
         editor.commands.unsetMark("textStyle");
         editor.chain().focus().sinkListItem("listItem").run();

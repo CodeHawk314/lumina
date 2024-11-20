@@ -123,9 +123,9 @@ export async function GET(req: Request) {
           const formattedText = text.replace(/\n/g, "\\n");
           fullResponse += formattedText;
           const bulletNum = getBulletNumber(fullResponse);
-          console.log(text);
+          // console.log(text);
           let strippedText = text.replace(/\n/g, ""); // text.replace(/\n\d+\./g, "");
-          console.log("lastChunk:", lastChunk);
+          // console.log("lastChunk:", lastChunk);
           if (lastChunk === ".") {
             // remove leading space from strippedText
             strippedText = strippedText.slice(1);
