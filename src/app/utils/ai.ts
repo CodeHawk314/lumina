@@ -1,6 +1,6 @@
 // import Together from "together-ai";
 // const together = new Together({
-//   apiKey: "6d89e3bcae49a64d845bfda30b26c3b079db88d817c5cea066951b0f089d5b56",
+//   apiKey: "",
 // });
 
 // Initial questions drawn from brainstorming resources

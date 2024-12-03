@@ -180,7 +180,6 @@ def generate_followup_questions(student_response):
     complete_response = ""
     for token in response:
         if hasattr(token, 'choices'):
-            #print(token.choices[0].delta.content, end='', flush=True)
             complete_response += token.choices[0].delta.content      
 
     # Split the complete response into individual follow-up questions
@@ -195,12 +194,36 @@ def generate_followup_questions(student_response):
         "follow_up_questions": follow_up_questions
     }
 
+def generate_feedback(context):
+    # Construct the message for TogetherAI API call
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                f"Please provide a list of potential essay topics the user can consider for their college application essays."
+                f"As a reminder, the user has provided the following responses to these college essay topic brainstorming questions: {context}"
+            ),
+        },
+    ]
+
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-3-70b-chat-hf",
+        messages=messages,
+        stream=False
+    )
+
+    full_response = response.choices[0].message.content
+    return full_response
+
 # Completes one round of brainstorming
-def brainstorming_round(questions, initial_round=True):
+def brainstorming_round(questions, initial_round):
     # Step 1: Collect responses from the student
     student_responses = {}
     for idx, question in enumerate(questions, start=1):
         response = input(f"Answer for Question {idx}: {question}\nYour response: ")
+        if initial_round and response == "":
+            print("\nPlease provide a response to for this initial round of questions")
+            response = input(f"Answer for Question {idx}: {question}\nYour response: ")
         student_responses[question] = response
 
     # Step 2: Generate follow-up questions based on student responses
@@ -223,10 +246,9 @@ def brainstorming_round(questions, initial_round=True):
     if not initial_round:
         continue_response = input("Would you like to continue brainstorming? (yes or no): ").strip().lower()
         if continue_response != 'yes':
-            return questions, False  # Stop further rounds
-    #selected_questions = all_follow_up_questions.values()
-    selected_questions = [question for sublist in all_follow_up_questions.values() for question in sublist]
-    return selected_questions, True  # Continue to another round
+            return questions, False, student_responses  # Stop further rounds
+    selected_questions = [question[3:] for sublist in all_follow_up_questions.values() for question in sublist]
+    return selected_questions, True, student_responses  # Continue to another round
 
 
 def main():
@@ -237,38 +259,29 @@ def main():
     for idx, question in enumerate(selected_questions, start=1):
         print(f"{idx}. {question}")
 
-     # First brainstorming round with initial questions
+    # Store student responses across all rounds
+    all_student_responses = {}
+
+     # Step 2: Begin brainstorming with initial questions
     continue_brainstorming = brainstorming_round(selected_questions, initial_round=True)
+    all_student_responses.update(continue_brainstorming[2])
 
     # Subsequent rounds of brainstorming with follow-up questions
     while continue_brainstorming[1]:
         print("\nStarting a new round of brainstorming.")
-        # Repeat brainstorming with the same initial questions or different ones as needed
+        # Repeat brainstorming
         continue_brainstorming = brainstorming_round(continue_brainstorming[0], initial_round=False)
+        all_student_responses.update(continue_brainstorming[2])
 
+    print("You have concluded brainstorming. We will now present potential essay topics of interest.\n")
 
-    # # Step 2: Collect responses from the student
-    # student_responses = {}
-    # for idx, question in enumerate(selected_questions, start=1):
-    #     # Placeholder for now, replace with student response from frontend
-    #     response = input(f"Answer for Question {idx}: {question}\nYour response: ")
-    #     student_responses[question] = response
+    # Step 3: Perform analysis on provided user responses
+    context = "\n".join(
+        [f"Q: {q}\n A: {a}" for q, a in all_student_responses.items() if a]
+    )
+    topics = generate_feedback(context)
+    print(topics)
 
-    # # Step 3: Generate follow-up questions based on student responses
-    # all_follow_up_questions = {}
-    # for question, response in student_responses.items():
-    #     follow_up_data = generate_followup_questions(response)
-    #     all_follow_up_questions[question] = follow_up_data["follow_up_questions"]
-
-    # # Step 4: Display all follow-up questions for each initial question
-    # print("\nGenerated Follow-Up Questions:")
-    # for initial_question, follow_up_questions in all_follow_up_questions.items():
-    #     student_response = student_responses[initial_question]  # Retrieve student's response
-    #     print(f"\nFor the question: '{initial_question}'")
-    #     print(f"Student's response: '{student_response}'")
-    #     print("Follow-up questions inspired by this response:")
-    #     for follow_up_question in follow_up_questions:
-    #         print(follow_up_question)
 
 # Run the main function
 if __name__ == "__main__":
