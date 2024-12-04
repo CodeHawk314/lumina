@@ -55,7 +55,7 @@ export async function GET(req: Request) {
           messages: [
             {
               role: "system",
-              content: `You are a college admissions consultant and are working with a student (the user) to generate a list of potential essay topics the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions tailored to their responses to the brainstorming questions. Provide your response in markdown format.`,
+              content: `You are a college admissions consultant and are working with a student (the user) to generate a list of potential essay topics the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions tailored to their responses to the brainstorming questions. Based on their brainstorming outline, give feedback on the most compelling aspects of their character, experiences, and insight, and suggest potential story arcs they could use for a college application essay. Provide your response in markdown format.`,
             },
             {
               role: "user",
