@@ -50,18 +50,44 @@ export async function GET(req: Request) {
   const responseStream = new ReadableStream({
     async start(controller) {
       try {
+        const collegeReviewerResp = await together.chat.completions.create({
+          model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+          messages: [
+            {
+              role: "system",
+              content: `You are a college admissions officer at a prestigious university. You are reviewing a student's outline from a brainstorming activity. Write some brutally honest internal notes on what you learn about what kind of student this is. Highlight strengths and weaknesses. Be detailed and concise, citing specific parts of their outline.`,
+            },
+            {
+              role: "user",
+              content: `Responses to the college application essay brainstorming activity: ${JSON.stringify(
+                outline
+              )}.`,
+            },
+          ],
+          stream: false,
+        });
+
+        const collegeReviewerRespText =
+          collegeReviewerResp.choices[0]?.message?.content || "";
+
+        console.log(collegeReviewerRespText);
+
         const stream = await together.chat.completions.create({
-          model: "meta-llama/Llama-3-70b-chat-hf",
+          model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
           messages: [
             {
               role: "system",
               content: `You are a college admissions consultant and are working with a student (the user) to generate a list of potential essay topics the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions tailored to their responses to the brainstorming questions. Based on their brainstorming outline, give feedback on the most compelling aspects of their character, experiences, and insight, and suggest potential story arcs they could use for a college application essay. Provide your response in markdown format.`,
             },
             {
+              role: "system",
+              content: `To help you, here are notes from a college admissions officer on this student's outline: ${collegeReviewerRespText}.`,
+            },
+            {
               role: "user",
               content: `Here are my responses to the college application essay brainstorming activity: ${JSON.stringify(
                 outline
-              )}. What are some topics I should write about for my essays?`,
+              )}.`,
             },
           ],
           stream: true,

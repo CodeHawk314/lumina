@@ -82,8 +82,28 @@ export async function GET(req: Request) {
   const responseStream = new ReadableStream({
     async start(controller) {
       try {
+        // const collegeReviewerResp = await together.chat.completions.create({
+        //   model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+        //   messages: [
+        //     {
+        //       role: "system",
+        //       content: `You are a college admissions officer at a prestigious university. You are reviewing a student's outline from a brainstorming activity. Write some brief brutally honest internal notes on what you learn about what kind of student this is. Highlight strengths and weaknesses. Be detailed and concise, citing specific parts of their outline.`,
+        //     },
+        //     {
+        //       role: "user",
+        //       content: `Responses to the college application essay brainstorming activity: ${JSON.stringify(
+        //         outline
+        //       )}.`,
+        //     },
+        //   ],
+        //   stream: false,
+        // });
+
+        // const collegeReviewerRespText =
+        //   collegeReviewerResp.choices[0]?.message?.content || "";
+
         const stream = await together.chat.completions.create({
-          model: "meta-llama/Llama-3-70b-chat-hf",
+          model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
           messages: [
             {
               role: "system",
@@ -101,12 +121,17 @@ export async function GET(req: Request) {
                 outline
               )}`,
             },
+            // {
+            //   role: "user",
+            //   content: `To help you, here are notes from a college admissions officer on this student's outline: ${collegeReviewerRespText}.`,
+            // },
             {
               role: "system",
               content:
                 `Based on the student response: "${studentResponse}", suggest 1-2 deeper follow-up questions ` +
                 `for the question "${question}"` +
-                `to explore the topic further for a college application essay. Format the output as follows:\n\n` +
+                `to explore the topic further for a college application essay. Encourage and push the student as needed based on the quality of their outline.` +
+                `Format the output as follows:\n\n` +
                 `1. [follow up question 1]\n` +
                 `2. [follow up question 2]\n` +
                 `Output ONLY the follow-up questions:`,

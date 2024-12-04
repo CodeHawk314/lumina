@@ -6,6 +6,20 @@ export type Bullet = {
   subbullets?: Bullet[];
 };
 
+export const countUserBullets = (outline: Bullet[]): number => {
+  const countBullets = (bullets: Bullet[]): number => {
+    return bullets.reduce((count, bullet) => {
+      const isUser = bullet.author === "USER" ? 1 : 0;
+      const subbulletsCount = bullet.subbullets
+        ? countBullets(bullet.subbullets)
+        : 0;
+      return count + isUser + subbulletsCount;
+    }, 0);
+  };
+
+  return countBullets(outline);
+};
+
 export function parseOutlineJson(json: JSONContent): Bullet[] {
   function parseListItem(item: JSONContent): Bullet {
     const textContent = item.content?.[0]?.content?.[0]?.text || "";
