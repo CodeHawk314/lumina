@@ -7,7 +7,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-center sm:text-left">Lumina</h1>
         <div className="text-md text-center sm:text-left text-gray-600">
           <p>
-            Lumina is a simple and powerful outliner for brainstorming college
+            Lumina is a simple and powerful brainstorming tool for college
             application essays. Lumina pushes you to reflect more deeply and
             concretely, and directs you share the parts of your story that
             matter most. For best results, answer the questions with 2-3
