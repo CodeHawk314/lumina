@@ -9,10 +9,12 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
-import { KeyboardEventHandler } from "react";
+import { KeyboardEventHandler, useState } from "react";
 import { Bullet, generateOutlineJson, parseOutlineJson } from "./outlineparse";
 import { selectInitialQuestions } from "@/app/utils/ai";
 import { Node } from "@tiptap/pm/model";
+import { Button } from "@chakra-ui/react";
+import ReactMarkdown from "react-markdown";
 
 const addToOutline = (
   editor: Editor,
@@ -67,6 +69,7 @@ const addToOutline = (
 
 const OutlineEditor = () => {
   const initialQuestions = selectInitialQuestions(3);
+  const [outlineReview, setOutlineReview] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -119,6 +122,54 @@ const OutlineEditor = () => {
 
   const nodeText = (node: Node): string => {
     return node.textContent || "";
+  };
+
+  const onSubmitForAnalysis = async () => {
+    console.log("submitting...");
+    if (editor === null) {
+      return;
+    }
+    setOutlineReview("");
+    const jsonContent = editor.getJSON();
+    // console.log(jsonContent);
+    const outline: Bullet[] = parseOutlineJson(jsonContent);
+
+    // Send outline data with POST
+    const response = await fetch("/api/generatereview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ outline }),
+    });
+
+    if (response.ok) {
+      // Receive sessionId from the server
+      const { sessionId } = await response.json();
+
+      // Open EventSource using the unique sessionId
+      const eventSource = new EventSource(
+        `/api/generatereview?sessionId=${sessionId}`
+      );
+
+      eventSource.onmessage = (event) => {
+        const text = event.data.slice(1, -1).replace(/\\n/g, "\n");
+
+        console.log(text);
+        setOutlineReview((prevOutlineReview) => prevOutlineReview + text);
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+      };
+
+      return () => {
+        eventSource.close();
+      };
+    } else {
+      console.error("Failed to send outline JSON");
+    }
   };
 
   const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = async (e) => {
@@ -181,17 +232,32 @@ const OutlineEditor = () => {
   };
 
   return (
-    <div
-      className="min-h-[40vh] w-full border p-8 border-gray-300 rounded-lg"
-      onClick={() => editor?.commands.focus("end")}
-    >
-      <EditorContent
-        editor={editor}
-        width={"full"}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={handleKeyDown}
-      />
-    </div>
+    <>
+      <div
+        className="min-h-[40vh] w-full border p-8 border-gray-300 rounded-lg"
+        onClick={() => editor?.commands.focus("end")}
+      >
+        <EditorContent
+          editor={editor}
+          width={"full"}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      <Button
+        borderColor={"green.600"}
+        color={"green.600"}
+        borderWidth={2}
+        fontWeight={"600"}
+        px={8}
+        variant={"outline"}
+        _hover={{ bg: "green.600", color: "white" }}
+        onClick={onSubmitForAnalysis}
+      >
+        Submit for analysis
+      </Button>
+      <ReactMarkdown className={"markdown"}>{outlineReview}</ReactMarkdown>
+    </>
   );
 };
 

@@ -19,3 +19,73 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.markdown {
+  font-size: 14px;
+}
+
+.markdown > ol,
+.markdown > ul {
+  padding-left: 10px; /* Ensure lists are indented within the div */
+  margin: 0; /* Remove default margin */
+  list-style-position: inside; /* Ensure numbers stay within the div */
+}
+
+.markdown ol,
+.markdown ul {
+  padding-left: 20px; /* Ensure lists are indented within the div */
+  margin: 0; /* Remove default margin */
+  list-style-position: outside; /* Ensure bullets stay within the div */
+}
+
+.markdown p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.markdown {
+  line-height: 1.23;
+  font-size: 16px;
+  font-weight: 390;
+  color: #505050;
+}
+
+.markdown h1 {
+  font-size: 32px; /* Largest heading size */
+  font-weight: bold; /* Emphasize the main heading */
+  margin-top: 20px; /* Add spacing above */
+  margin-bottom: 15px; /* Add spacing below */
+  color: #333333; /* Darker color for emphasis */
+}
+
+.markdown h2 {
+  font-size: 28px; /* Slightly smaller than h1 */
+  font-weight: bold; /* Keep it bold for hierarchy */
+  margin-top: 18px; /* Add spacing above */
+  margin-bottom: 12px; /* Add spacing below */
+  color: #444444; /* Slightly lighter color than h1 */
+}
+
+.markdown h3 {
+  font-size: 24px; /* Medium heading size */
+  font-weight: 600; /* Semi-bold for distinction */
+  margin-top: 16px; /* Add spacing above */
+  margin-bottom: 10px; /* Add spacing below */
+  color: #555555; /* Medium gray color */
+}
+
+.markdown h4 {
+  font-size: 20px; /* Smaller heading size */
+  font-weight: 600; /* Semi-bold for distinction */
+  margin-top: 14px; /* Add spacing above */
+  margin-bottom: 8px; /* Add spacing below */
+  color: #666666; /* Lighter gray color */
+}
+
+.markdown h5 {
+  font-size: 18px; /* Smallest heading size */
+  font-weight: 500; /* Slightly lighter for smaller headings */
+  margin-top: 12px; /* Add spacing above */
+  margin-bottom: 6px; /* Add spacing below */
+  color: #777777; /* Even lighter gray color */
+}
