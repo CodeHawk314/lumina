@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         },
         {
           role: "system",
-          content: `Give the 1 paragraph summary of the applicant. Be concise. Give your memo directly, without any introduction, headings, or formatting. Refer to USER as "the student".`,
+          content: `Give the 1 paragraph summary of the applicant. Don't address their writing quality. Be concise. Be brutally honest, mentioning things you would still like to learn about the student. Give your memo directly, without any introduction, headings, or formatting. Refer to USER as "the student".`,
         },
       ],
       stream: false,

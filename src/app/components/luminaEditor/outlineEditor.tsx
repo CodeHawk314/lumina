@@ -18,7 +18,13 @@ import {
 } from "./outlineparse";
 import { selectInitialQuestions } from "@/app/utils/ai";
 import { Node } from "@tiptap/pm/model";
-import { Box, Button, Text as ChakraText, HStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Text as ChakraText,
+  HStack,
+  Separator,
+} from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import PuffLoader from "react-spinners/PuffLoader";
 
@@ -293,9 +299,11 @@ const OutlineEditor = () => {
           <ChakraText fontSize={18} fontWeight={700}>
             Admissions Officer Summary
           </ChakraText>
-          <ChakraText color={"gray.600"}>
-            What an AO might think about you based on your outline so far
+          <ChakraText color={"gray.500"} lineHeight={1} mb={1}>
+            What an AO might think based on your outline so far. Is this a good
+            description of you? If not keep adding to your outline!
           </ChakraText>
+          <Box h={"1px"} widows={"full"} backgroundColor={"gray.300"} mb={2} />
           <ChakraText>{aoSummary}</ChakraText>
         </div>
       )}
