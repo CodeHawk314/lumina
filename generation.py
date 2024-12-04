@@ -202,10 +202,16 @@ def generate_feedback(context):
             "content": (
                 f"You are a college admissions consultant and are working with a student (the user) to generate a list of potential essay topics"
                 f"the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions"
-                f"tailored to their responses to the brainstorming questions. Please provide your response in markdown format."
+                f"tailored to their responses to the brainstorming questions."
             ),
         },
-        {"role": "user", "content": f"Here are my responses to the college application essay brainstorming activity: {context}. What are some topics I should write about for my essays?"}
+        {
+            "role": "user", 
+            "content": (
+                f"Here are my responses to the college application essay brainstorming activity: {context}. What are some topics I should write about for my essays?" 
+                f"What are my points of strength, and what narratives I can use in my writing?"
+            ),
+        }
     ]
 
     admissions_officer_messages = [
@@ -214,10 +220,16 @@ def generate_feedback(context):
             "content": (
                 f"You are a college admissions officer and are providing assistance to a student (the user) to generate a list of potential essay topics"
                 f"the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions"
-                f"tailored to their responses to the brainstorming questions. Please provide your response in markdown format."
+                f"tailored to their responses to the brainstorming questions."
             ),
         },
-        {"role": "user", "content": f"Here are my responses to the college application essay brainstorming activity: {context}. What are some topics I should write about for my essays?"}
+        {
+            "role": "user", 
+            "content": (
+                f"Here are my responses to the college application essay brainstorming activity: {context}. What are some topics I should write about for my essays?" 
+                f"What are my points of strength, and what narratives I can use in my writing?"
+            ),
+        }
     ]
 
     consultant_response = client.chat.completions.create(
@@ -227,14 +239,40 @@ def generate_feedback(context):
     )
 
     ao_response = client.chat.completions.create(
-    model="meta-llama/Llama-3-70b-chat-hf",
-    messages=admissions_officer_messages,
-    stream=False
+        model="meta-llama/Llama-3-70b-chat-hf",
+        messages=admissions_officer_messages,
+        stream=False
     )
 
     full_consultant_response = consultant_response.choices[0].message.content
     full_ao_response = ao_response.choices[0].message.content
-    return full_consultant_response, full_ao_response
+
+    #  Please provide ONLY your response using markdown format
+    final_agent_messages = [
+        {
+            "role": "system",
+            "content": (
+                f"You are a reviewing suggested college application essay topics suggested by  an admissions consultant and admissions officer to a student they are working with."
+                f"The following was suggested by the admissions consultant: {full_consultant_response}."
+                f"The following was suggested by the admissions officer: {full_ao_response}."
+                f"Based on both of these suggestions, please provide the best suggested essay topics, points of strength, and potential narratives for the student. Provide your response in markdown format."
+            ),
+        },
+        {
+            "role": "user", 
+            "content": (
+                f"What are some topics I should write about for my essays?" 
+                f"What are my points of strength, and what narratives I can use in my writing?"
+            ),
+        }
+    ]
+
+    final_agent_response = client.chat.completions.create(
+        model="meta-llama/Llama-3-70b-chat-hf",
+        messages=final_agent_messages,
+        stream=False
+    )
+    return final_agent_response.choices[0].message.content
 
 # Completes one round of brainstorming
 def brainstorming_round(questions, initial_round):
@@ -275,7 +313,7 @@ def brainstorming_round(questions, initial_round):
 def main():
     # Step 1: Select initial questions
     # Change num_questions back to 5 when not debugging
-    selected_questions = select_initial_questions(num_questions=5)
+    selected_questions = select_initial_questions(num_questions=2)
     print("Initial Questions:")
     for idx, question in enumerate(selected_questions, start=1):
         print(f"{idx}. {question}")
