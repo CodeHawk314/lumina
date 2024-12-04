@@ -196,24 +196,45 @@ def generate_followup_questions(student_response):
 
 def generate_feedback(context):
     # Construct the message for TogetherAI API call
-    messages = [
+    admissions_consultant_messages = [
         {
             "role": "system",
             "content": (
-                f"Please provide a list of potential essay topics the user can consider for their college application essays."
-                f"As a reminder, the user has provided the following responses to these college essay topic brainstorming questions: {context}"
+                f"You are a college admissions consultant and are working with a student (the user) to generate a list of potential essay topics"
+                f"the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions"
+                f"tailored to their responses to the brainstorming questions. Please provide your response in markdown format."
             ),
         },
+        {"role": "user", "content": f"Here are my responses to the college application essay brainstorming activity: {context}. What are some topics I should write about for my essays?"}
     ]
 
-    response = client.chat.completions.create(
+    admissions_officer_messages = [
+        {
+            "role": "system",
+            "content": (
+                f"You are a college admissions officer and are providing assistance to a student (the user) to generate a list of potential essay topics"
+                f"the student can use for their college application essays based on a brainstorming activity in which the student has been asked follow-up questions"
+                f"tailored to their responses to the brainstorming questions. Please provide your response in markdown format."
+            ),
+        },
+        {"role": "user", "content": f"Here are my responses to the college application essay brainstorming activity: {context}. What are some topics I should write about for my essays?"}
+    ]
+
+    consultant_response = client.chat.completions.create(
         model="meta-llama/Llama-3-70b-chat-hf",
-        messages=messages,
+        messages=admissions_consultant_messages,
         stream=False
     )
 
-    full_response = response.choices[0].message.content
-    return full_response
+    ao_response = client.chat.completions.create(
+    model="meta-llama/Llama-3-70b-chat-hf",
+    messages=admissions_officer_messages,
+    stream=False
+    )
+
+    full_consultant_response = consultant_response.choices[0].message.content
+    full_ao_response = ao_response.choices[0].message.content
+    return full_consultant_response, full_ao_response
 
 # Completes one round of brainstorming
 def brainstorming_round(questions, initial_round):
