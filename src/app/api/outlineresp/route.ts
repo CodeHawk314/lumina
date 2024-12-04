@@ -83,7 +83,7 @@ export async function GET(req: Request) {
     async start(controller) {
       try {
         const stream = await together.chat.completions.create({
-          model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+          model: "meta-llama/Llama-3-70b-chat-hf",
           messages: [
             {
               role: "system",
