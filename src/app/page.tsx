@@ -1,4 +1,5 @@
 import OutlineEditor from "./components/luminaEditor/outlineEditor";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -22,6 +23,17 @@ export default function Home() {
           </p>
         </div>
         <OutlineEditor />
+        <Button
+          borderColor={"green.600"}
+          color={"green.600"}
+          borderWidth={2}
+          fontWeight={"600"}
+          px={8}
+          variant={"outline"}
+          _hover={{ bg: "green.600", color: "white" }}
+        >
+          Submit for analysis
+        </Button>
       </main>
     </div>
   );
