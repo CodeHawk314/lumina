@@ -82,25 +82,28 @@ export async function GET(req: Request) {
   const responseStream = new ReadableStream({
     async start(controller) {
       try {
-        // const collegeReviewerResp = await together.chat.completions.create({
-        //   model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-        //   messages: [
-        //     {
-        //       role: "system",
-        //       content: `You are a college admissions officer at a prestigious university. You are reviewing a student's outline from a brainstorming activity. Write some brief brutally honest internal notes on what you learn about what kind of student this is. Highlight strengths and weaknesses. Be detailed and concise, citing specific parts of their outline.`,
-        //     },
-        //     {
-        //       role: "user",
-        //       content: `Responses to the college application essay brainstorming activity: ${JSON.stringify(
-        //         outline
-        //       )}.`,
-        //     },
-        //   ],
-        //   stream: false,
-        // });
+        const collegeReviewerResp = await together.chat.completions.create({
+          model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+          messages: [
+            {
+              role: "system",
+              content: `You are a college admissions officer at a prestigious university. You are reviewing a student's outline from a brainstorming activity.
+              Think about what you still want to learn about the student. Brainstorm 4 questions relating to student's response "${studentResponse}" that you'd like to ask the student to learn more about who they are.`,
+            },
+            {
+              role: "user",
+              content: `Responses to the college application essay brainstorming activity: ${JSON.stringify(
+                outline
+              )}.`,
+            },
+          ],
+          stream: false,
+        });
 
-        // const collegeReviewerRespText =
-        //   collegeReviewerResp.choices[0]?.message?.content || "";
+        const collegeReviewerRespText =
+          collegeReviewerResp.choices[0]?.message?.content || "";
+
+        console.log("collegeReviewerRespText:", collegeReviewerRespText);
 
         const stream = await together.chat.completions.create({
           model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
@@ -121,10 +124,10 @@ export async function GET(req: Request) {
                 outline
               )}`,
             },
-            // {
-            //   role: "user",
-            //   content: `To help you, here are notes from a college admissions officer on this student's outline: ${collegeReviewerRespText}.`,
-            // },
+            {
+              role: "user",
+              content: `To help you, here are questions that a college admissions officer wants to ask the student: ${collegeReviewerRespText}.`,
+            },
             {
               role: "system",
               content:
