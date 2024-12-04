@@ -35,9 +35,7 @@ export async function POST(req: Request) {
     const collegeReviewerRespText =
       collegeReviewerResp.choices[0]?.message?.content || "";
 
-    console.log(collegeReviewerRespText);
-
-    const scoreAgent = await together.chat.completions.create({
+    const summaryAgent = await together.chat.completions.create({
       model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
       messages: [
         {
@@ -65,7 +63,7 @@ export async function POST(req: Request) {
       stream: false,
     });
 
-    const summary = scoreAgent.choices[0]?.message?.content || "";
+    const summary = summaryAgent.choices[0]?.message?.content || "";
 
     return NextResponse.json({ summary });
   } catch (error) {
