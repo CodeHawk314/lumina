@@ -7,6 +7,7 @@ import Document from "@tiptap/extension-document";
 import ListItem from "@tiptap/extension-list-item";
 import Paragraph from "@tiptap/extension-paragraph";
 import Placeholder from "@tiptap/extension-placeholder";
+import History from "@tiptap/extension-history";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
@@ -100,6 +101,7 @@ const OutlineEditor = () => {
       Bold,
       TextStyle,
       Color,
+      History,
       Placeholder.configure({
         showOnlyCurrent: false,
         includeChildren: true,
@@ -114,9 +116,7 @@ const OutlineEditor = () => {
       .map(
         (q) => `
         <li><span style="color: #958DF1">${q}</span>
-          <ul>
-            <li></li>
-          </ul>
+          <ul></ul>
         </li>`
       )
       .join("")}
