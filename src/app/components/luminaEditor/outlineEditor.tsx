@@ -6,6 +6,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import Document from "@tiptap/extension-document";
 import ListItem from "@tiptap/extension-list-item";
 import Paragraph from "@tiptap/extension-paragraph";
+import Placeholder from "@tiptap/extension-placeholder";
 import Text from "@tiptap/extension-text";
 import "./tiptapStyles.css";
 import TextStyle from "@tiptap/extension-text-style";
@@ -53,6 +54,9 @@ const addToOutline = (
           if (!bullet.subbullets[responseNum].text) {
             bullet.subbullets[responseNum].text = "";
           }
+          if (bullet.subbullets[responseNum].text == "Analyzing...") {
+            bullet.subbullets[responseNum].text = "";
+          }
           bullet.subbullets[responseNum].text += additionText;
           bullet.subbullets[responseNum].author = "LLM";
         } else {
@@ -96,6 +100,13 @@ const OutlineEditor = () => {
       Bold,
       TextStyle,
       Color,
+      Placeholder.configure({
+        showOnlyCurrent: false,
+        includeChildren: true,
+        placeholder: ({}) => {
+          return "Student response...";
+        },
+      }),
     ],
     content: `
     <ul>
@@ -104,7 +115,7 @@ const OutlineEditor = () => {
         (q) => `
         <li><span style="color: #958DF1">${q}</span>
           <ul>
-            <li>Student response goes here...</li>
+            <li></li>
           </ul>
         </li>`
       )
@@ -241,7 +252,13 @@ const OutlineEditor = () => {
         editor.commands.unsetMark("textStyle");
         editor.chain().focus().sinkListItem("listItem").run();
         return;
+      } else {
+        // set marks to color text
+        editor.chain().focus().setMark("textStyle", { color: "#958DF1" }).run();
+        // set text to "Analyzing..."
+        editor.chain().focus().insertContent("Analyzing...").run();
       }
+
       const currentLine = nodeText(node.child(0));
 
       const outline = parseOutlineJson(editor.getJSON());
@@ -339,7 +356,9 @@ const OutlineEditor = () => {
           </ChakraText>
         </HStack>
       )}
-      <ReactMarkdown className={"markdown"}>{outlineReview}</ReactMarkdown>
+      {outlineReview && (
+        <ReactMarkdown className={"markdown"}>{outlineReview}</ReactMarkdown>
+      )}
     </>
   );
 };
