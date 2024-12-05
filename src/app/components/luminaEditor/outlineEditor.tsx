@@ -311,19 +311,6 @@ const OutlineEditor = () => {
 
   return (
     <>
-      {aoSummary && (
-        <div className="border p-4 border-gray-300 rounded-lg">
-          <ChakraText fontSize={18} fontWeight={700}>
-            Admissions Officer Summary
-          </ChakraText>
-          <ChakraText color={"gray.500"} lineHeight={1} mb={1}>
-            What an AO might think based on your outline so far. Is this a good
-            description of you? If not keep adding to your outline!
-          </ChakraText>
-          <Box h={"1px"} widows={"full"} backgroundColor={"gray.300"} mb={2} />
-          <ChakraText>{aoSummary}</ChakraText>
-        </div>
-      )}
       <div
         className="min-h-[40vh] w-full border p-8 border-gray-300 rounded-lg"
         onClick={() => editor?.commands.focus("end")}
@@ -335,6 +322,19 @@ const OutlineEditor = () => {
           onKeyDown={handleKeyDown}
         />
       </div>
+      {aoSummary && (
+        <div className="border p-4 border-gray-300 rounded-lg">
+          <ChakraText fontSize={18} fontWeight={700}>
+            Admissions Officer Summary
+          </ChakraText>
+          <ChakraText color={"gray.500"} lineHeight={1} mb={1}>
+            What an AO might think based on your outline so far. Is this a good
+            description of you? If not, keep adding to your outline!
+          </ChakraText>
+          <Box h={"1px"} widows={"full"} backgroundColor={"gray.300"} mb={2} />
+          <ChakraText>{aoSummary}</ChakraText>
+        </div>
+      )}
       <Button
         borderColor={"green.600"}
         color={"green.600"}
