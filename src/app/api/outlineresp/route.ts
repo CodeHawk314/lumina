@@ -22,10 +22,7 @@ export async function POST(req: Request) {
   }
 }
 
-export function findParentNode(
-  outline: Bullet[],
-  question: string
-): Bullet | null {
+function findParentNode(outline: Bullet[], question: string): Bullet | null {
   // Helper function to recursively search for the parent node
   const searchParent = (
     nodes: Bullet[],
