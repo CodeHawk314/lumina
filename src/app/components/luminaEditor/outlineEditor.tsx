@@ -20,13 +20,7 @@ import {
 } from "./outlineparse";
 import { selectInitialQuestions } from "@/app/utils/ai";
 import { Node } from "@tiptap/pm/model";
-import {
-  Box,
-  Button,
-  Text as ChakraText,
-  HStack,
-  Separator,
-} from "@chakra-ui/react";
+import { Box, Button, Text as ChakraText, HStack } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import PuffLoader from "react-spinners/PuffLoader";
 
@@ -196,25 +190,6 @@ const OutlineEditor = () => {
     } else {
       console.error("Failed to send outline JSON");
     }
-  };
-
-  const getScore = async () => {
-    console.log("getting score");
-    if (editor === null) {
-      return;
-    }
-    const jsonContent = editor.getJSON();
-    const outline: Bullet[] = parseOutlineJson(jsonContent);
-
-    const score = await fetch("/api/scoreoutline", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ outline }),
-    });
-    console.log(score);
   };
 
   const getSummary = async () => {
