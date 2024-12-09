@@ -1,13 +1,9 @@
 # import openai
 import random
-import os
 from together import Together
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="./.env.local")
-
-# Run line below in terminal to set up together ai API key
-# export TOGETHER_API_KEY=ba1f969850aff90a61277544c46b4afb81183cf1d5f86a059615ee7fe5c24a56
 
 client = Together()
 
