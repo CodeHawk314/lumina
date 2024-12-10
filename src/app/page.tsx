@@ -1,5 +1,6 @@
 import Image from "next/image";
 import OutlineEditor from "./components/luminaEditor/outlineEditor";
+import { Link } from "@chakra-ui/react";
 
 export default function Home() {
   return (
@@ -14,7 +15,7 @@ export default function Home() {
             height: 100,
             width: "auto",
           }}
-        ></Image>
+        />
         {/* <h1 className="text-4xl font-bold text-center sm:text-left">Lumina</h1> */}
         <div className="text-md text-center sm:text-left text-gray-600">
           <p>
@@ -29,7 +30,17 @@ export default function Home() {
           <br />
           <p>
             Lumina is a work in progress. It is currently in alpha and is
-            missing many features. If you have any feedback, please let us know!
+            missing many features. Please provide your feedback!{" "}
+            <Link
+              href="https://forms.gle/DgpkgeL37SmBkvGx8"
+              target="_blank"
+              color={"#958DF1"}
+              textDecoration={"underline"}
+              textUnderlineOffset={2}
+            >
+              Feedback form
+            </Link>
+            .
           </p>
         </div>
         <OutlineEditor />
